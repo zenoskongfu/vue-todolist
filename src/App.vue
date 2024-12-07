@@ -3,7 +3,7 @@
 <template>
 	<div>
 		<h1>Hi, 这里是TODOLIST的起始页</h1>
-		<div>DEVELOP VERSION</div>
+		<div>DEVELOP VERSION 2.0</div>
 	</div>
 </template>
 
