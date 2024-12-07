@@ -20,7 +20,23 @@ jobs:
               uses: webfactory/ssh-agent@v0.8.0
               with:
                   ssh-private-key: ${{ secrets.ALIYUN_SECRET_KEY }}
+            - name: Deploy Test
+              env:
+                  DEPLOY_PATH: "/www/wwwroot/todo-list" # 部署路径
+                  DEPLOY_USER: ${{ secrets.ALIYUN_USER_NAME }}
+                  DEPLOY_HOST: ${{ secrets.ALIYUN_HOST }}
+              run: |
+                  # 首先添加服务器到已知主机
+                  mkdir -p ~/.ssh
+                  ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts
 
+                  # 显示 SSH 版本和配置
+                  ssh -V
+
+                  # 测试 SSH 连接
+                  ssh -v $DEPLOY_USER@$DEPLOY_HOST "echo 'Test connection'"
+
+                  ssh $DEPLOY_USER@$DEPLOY_HOST "mkdir /www/wwwroot/test2"
             - name: Deploy
               env:
                   DEPLOY_PATH: "/www/wwwroot/todo-list" # 部署路径
@@ -30,16 +46,16 @@ jobs:
                   # 首先添加服务器到已知主机
                   mkdir -p ~/.ssh
                   ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts
-                  
+
                   # 显示 SSH 版本和配置
                   ssh -V
-                  
+
                   # 测试 SSH 连接
                   ssh -v $DEPLOY_USER@$DEPLOY_HOST "echo 'Test connection'"
-                  
+
                   TIMESTAMP=$(date +%Y%m%d_%H%M%S)
                   DEPLOY_DIR="${DEPLOY_PATH}/release/${TIMESTAMP}"
-                  
+
                   ssh $DEPLOY_USER@$DEPLOY_HOST "mkdir -p ${DEPLOY_DIR}"
                   scp -r dist/* $DEPLOY_USER@$DEPLOY_HOST:${DEPLOY_DIR}/
                   ssh $DEPLOY_USER@$DEPLOY_HOST "ln -sfn ${DEPLOY_DIR} ${DEPLOY_PATH}/current"
