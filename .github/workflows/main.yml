@@ -34,7 +34,7 @@ jobs:
 
                   DEPLOY_DIR="${DEPLOY_PATH}/release/${TIMESTAMP}"
 
-                  ssh $DEPLOY_USER@DEPLOY_HOST "mkdir -p ${DEPLOY_DIR}"
+                  ssh $DEPLOY_USER@$DEPLOY_HOST "mkdir -p ${DEPLOY_DIR}"
 
                   scp -r dist/* $DEPLOY_USER@$DEPLOY_HOST:${DEPLOY_DIR}/
 
