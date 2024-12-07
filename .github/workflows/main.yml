@@ -1,0 +1,29 @@
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: install
+        run: npm i
+
+      - name: build
+        run: npm run build
+
+      - name: upload file to aliyun server
+        uses: zhenyuWang/Upload-File-Action@v1.0.1
+        with:
+          username: ${{ secrets.ALIYUN_USER_NAME}} #远程服务器的登录名
+          server: ${{ secrets.ALIYUN_HOST }} #远程服务器的ip地址
+          port: "22" #远程服务器的端口
+          ssh_private_key: ${{ secrets.SERVER_SECRET_KEY}} #远程服务器的私钥
+          # 要上传文件所在目录
+          local_path: "./dist"
+          # 远程服务器目标路径
+          target_path: "/www/wwwroot/todolist-2"
