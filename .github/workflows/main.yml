@@ -26,7 +26,9 @@ jobs:
                   DEPLOY_PATH: "/www/wwwroot/todo-list" # 部署路径
                   DEPLOY_USER: ${{ secrets.ALIYUN_USER_NAME }}
                   DEPLOY_HOST: ${{ secrets.ALIYUN_HOST }}
-              run: ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/know_hosts
+              run:
+                  #添加服务器到已知主机
+                  ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/know_hosts
                   TIMESTAMP=$(date +%Y%m%d_%H%M%S)
                   DEPLOY_DIR="${DEPLOY_PATH}/release/${TIMESTAMP}"
 
