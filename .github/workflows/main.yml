@@ -27,9 +27,6 @@ jobs:
                   DEPLOY_HOST: ${{ secrets.ALIYUN_HOST }}
               run: |
                   # 首先添加服务器到已知主机
-                  echo $DEPLOY_USER
-                  echo $DEPLOY_HOST
-                  echo ${{ secrets.ALIYUN_SECRET_KEY }}
                   mkdir -p ~/.ssh
                   ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts
 
