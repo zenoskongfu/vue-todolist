@@ -21,6 +21,9 @@ jobs:
               with:
                   ssh-private-key: ${{ secrets.ALIYUN_SECRET_KEY }}
 
+                  # 测试 SSH 连接（使用详细输出）
+36|               ssh -v ${{ secrets.ALIYUN_USER_NAME }}@${{ secrets.ALIYUN_HOST }} "echo 'Test connection'"
+
             - name: Deploy
               env:
                   DEPLOY_PATH: "/www/wwwroot/todo-list" # 部署路径
