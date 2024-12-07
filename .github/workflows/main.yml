@@ -28,6 +28,7 @@ jobs:
                   DEPLOY_HOST: ${{ secrets.ALIYUN_HOST }}
               run: |
                   echo $DEPLOY_KEY > key.pem
+                  cat key.pem
                   sudo chmod 400 key.pem
                   eval $(ssh-agent -s)
                   ssh-add key.pem
