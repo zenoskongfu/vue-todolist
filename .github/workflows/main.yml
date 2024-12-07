@@ -24,11 +24,11 @@ jobs:
             - name: Deploy
               env:
                   DEPLOY_PATH: "/www/wwwroot/todo-list" # 部署路径
-                  DEPLOY_USER: ${{ secrets.ALIYUN_USERNAME }}
+                  DEPLOY_USER: ${{ secrets.ALIYUN_USER_NAME }}
                   DEPLOY_HOST: ${{ secrets.ALIYUN_HOST }}
               run: ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/know_hosts
-                  TIMESTAMP=$(date +%Y%m%d_%H&M%S)
-                  DEPLOY_DIR="{DEPLOY_PATH}/release/${TIMESTAMP}"
+                  TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+                  DEPLOY_DIR="${DEPLOY_PATH}/release/${TIMESTAMP}"
 
                   ssh $DEPLOY_USER@DEPLOY_HOST "mkdir -p ${DEPLOY_DIR}"
                   scp -r dist/* $DEPLOY_USER@$DEPLOY_HOST:${DEPLOY_DIR}/
