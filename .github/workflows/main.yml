@@ -22,7 +22,7 @@ jobs:
                   ssh-private-key: ${{ secrets.ALIYUN_SECRET_KEY }}
 
                   # 测试 SSH 连接（使用详细输出）
-                ssh -v ${{ secrets.ALIYUN_USER_NAME }}@${{ secrets.ALIYUN_HOST }} "echo 'Test connection'"
+                  ssh -v ${{ secrets.ALIYUN_USER_NAME }}@${{ secrets.ALIYUN_HOST }} "echo 'Test connection'"
 
             - name: Deploy
               env:
