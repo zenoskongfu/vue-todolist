@@ -51,14 +51,7 @@ jobs:
                   DEPLOY_HOST: ${{ secrets.ALIYUN_HOST }}
               run: |
                   # 首先添加服务器到已知主机
-                  mkdir -p ~/.ssh
                   ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts
-
-                  # 显示 SSH 版本和配置
-                  ssh -V
-
-                  # 测试 SSH 连接
-                  ssh -v $DEPLOY_USER@$DEPLOY_HOST "echo 'Test connection'"
 
                   TIMESTAMP=$(date +%Y%m%d_%H%M%S)
                   DEPLOY_DIR="${DEPLOY_PATH}/release/${TIMESTAMP}"
