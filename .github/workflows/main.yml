@@ -31,8 +31,8 @@ jobs:
                   cat key.pem
                   sudo chmod 400 key.pem
                   eval $(ssh-agent -s)
-                  ssh-add key.pem
-                  ssh-add l
+                  ssh-add ./key.pem
+                  ssh-add -l
                   # 首先添加服务器到已知主机
                   mkdir -p ~/.ssh
                   ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts
