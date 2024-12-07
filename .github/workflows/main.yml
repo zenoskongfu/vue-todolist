@@ -27,13 +27,13 @@ jobs:
                   DEPLOY_USER: ${{ secrets.ALIYUN_USER_NAME }}
                   DEPLOY_HOST: ${{ secrets.ALIYUN_HOST }}
               run: |
-                   # 显示 SSH 版本和配置
+                  # 显示 SSH 版本和配置
                   ssh -V
-                  
+
                   # 测试 SSH 连接（使用详细输出）
                   ssh -v $DEPLOY_USER@$DEPLOY_HOST "echo 'Test connection'"
-                  
-                  #添加服务器到已知主机
+
+                  # 添加服务器到已知主机
                   ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts
 
                   TIMESTAMP=$(date +%Y%m%d_%H%M%S)
@@ -44,4 +44,4 @@ jobs:
 
                   scp -r dist/* $DEPLOY_USER@$DEPLOY_HOST:${DEPLOY_DIR}/
 
-                  ssh $DEPLOY_USER@DEPLOY_HOST "ln -sfn ${DEPLOY_DIR} ${DEPLOY_PATH}/current"
+                  ssh $DEPLOY_USER@$DEPLOY_HOST "ln -sfn ${DEPLOY_DIR} ${DEPLOY_PATH}/current"
