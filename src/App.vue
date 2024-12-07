@@ -2,8 +2,8 @@
 
 <template>
 	<div>
-		<h1>Hi, 王诗迪同学, 这里是TODOLIST的起始页</h1>
-		<div>版本2</div>
+		<h1>Hi, 这里是TODOLIST的起始页</h1>
+		<div>DEVELOP VERSION</div>
 	</div>
 </template>
 
