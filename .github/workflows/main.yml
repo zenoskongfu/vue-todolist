@@ -1,6 +1,6 @@
 on:
     push:
-        branches: [main]
+        branches: [main, develop]
 
 jobs:
     build:
@@ -16,6 +16,19 @@ jobs:
             - name: build
               run: npm run build
 
+            - name: Set deploy directory
+              env:
+                  RELEASE_BRANCH: "refs/heads/main"
+                  RELEASE_DIR: "/www/wwwroot/todo-list/release"
+                  DEV_BRANCH: "refs/heads/develop"
+                  DEV_DIR: "/www/wwwroot/todo-list/develop"
+              run: |
+                  # 根据分支设置部署路径
+                  if [ "${{ github.ref }}" = "$RELEASE_BRANCH" ]; then
+                    echo "DEPLOY_DIR=$RELEASE_DIR" >> $GITHUB_ENV
+                  elif [ "${{ github.ref }}" = "$DEV_BRANCH" ]; then
+                    echo "DEPLOY_DIR=$DEV_DIR" >> $GITHUB_ENV
+                  fi
             - name: Setup SSH
               uses: webfactory/ssh-agent@v0.8.0
               with:
@@ -30,7 +43,7 @@ jobs:
                   ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts
 
                   TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-                  DEPLOY_DIR="${DEPLOY_PATH}/release/${TIMESTAMP}"
+                  DEPLOY_DIR="${DEPLOY_DIR}/${TIMESTAMP}"
 
                   ssh $DEPLOY_USER@$DEPLOY_HOST "mkdir -p ${DEPLOY_DIR}"
                   scp -r dist/* $DEPLOY_USER@$DEPLOY_HOST:${DEPLOY_DIR}/
