@@ -5,6 +5,13 @@ on:
 jobs:
     build:
         runs-on: ubuntu-latest
+        env:
+            MAIN_ENV: production
+            DEVELOP_ENV: development
+            DEFAULT_ENV: development
+        environment:
+            name: ${{ (github.ref == 'refs/heads/main' && 'production')  ||
+                (github.ref == 'refs/heads/develop' && 'development') }}
         steps:
             - uses: actions/checkout@v4.2.2
               with:
