@@ -25,7 +25,7 @@ const submit = () => {
 		<button type="submit" id="button_form" @click="submit">提交</button>
 		<!-- </form> -->
 		<div class="main_container">
-			<div id="button_main">全部标为完成</div>
+			<div id="button_main">全部标为完成😄</div>
 			<div class="list">
 				<div class="list-item" v-for="task in tasks">{{ task }}</div>
 			</div>
