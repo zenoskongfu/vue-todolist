@@ -21,19 +21,19 @@
 				<li @click="showInProgressTasks()" id="li-second" :class="pageContext === 'doing' ? 'selected' : ''">
 					进行中
 				</li>
-				<li @click="showCompletedTasks()">已完成</li>
+				<!-- <li @click="showCompletedTasks()">已完成</li>
 				<li @click="showRecycleBin()">回收站</li>
 				<li @click="markAllAsCompleted()">全部标为已完成</li>
 				<li @click="clearCompletedTasks()">清除已完成</li>
 				<li @click="clearAllTasks()">清除全部</li>
-				<li @click="exportData()" id="li-bittom">导出数据</li>
+				<li @click="exportData()" id="li-bittom">导出数据</li> -->
 			</ul>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, watchEffect } from "vue";
+import { ref, watch } from "vue";
 // ts
 type TypeTask = {
 	content: string;
