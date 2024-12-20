@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref } from "vue";
-
+import { onMounted, ref } from "vue";
+import { addTask, getAllTasks } from "./api/tasks";
+const user_id = import.meta.env.VITE_USER_ID;
 // 声明一个变量，用来储存代办事项：[]
 // 数组也是一种数据类型
 // 数据结构：数组，栈，队列，二叉树，多叉树，链表，图
@@ -16,9 +17,22 @@ const submit = () => {
 	tasks.value.push(inputValue.value);
 	inputValue.value = "";
 };
+
+const addTaskFn = () => {
+	addTask({
+		title: inputValue.value,
+		user_id: user_id,
+	});
+};
+
+onMounted(async () => {
+	const res = await getAllTasks(user_id);
+	console.log(res);
+});
 </script>
 
 <template>
+	<button @click="addTaskFn">添加待办事项</button>
 	<div class="todo_container">
 		<!-- <form id="todoForm"> -->
 		<input type="text" id="todoInput" placeholder="新增待办事项..." v-model="inputValue" />
