@@ -8,70 +8,109 @@
 		<div class="main-container">
 			<button id="button-main">全部标为完成</button>
 			<div class="list">
-				<div class="list-item" v-for="(item, index) in tasks" :key="index">
+				<div class="list-item" v-for="(item, index) in tasks" :key="index" v-show="isShow(item)">
 					{{ item.content }}
-					<input type="checkbox" id="checkbox" value=" " v-model="item.status" />
+					<input type="checkbox" id="checkbox" value=" " v-model="item.isFinished" />
 					<button class="delete-button" @click="deleteTask(item.content)">❌</button>
 				</div>
 			</div>
 		</div>
 		<div id="task-container">
 			<ul class="task-list">
-				<li @click="selectAllTasks()" id="li-top">全部</li>
-				<li @click="showInProgressTasks()" id="li-second">进行中</li>
-				<li @click="showCompletedTasks()">已完成</li>
+				<li @click="selectAllTasks()" id="li-top" :class="pageContext === 'default' ? 'selected' : ''">全部</li>
+				<li @click="showInProgressTasks()" id="li-second" :class="pageContext === 'doing' ? 'selected' : ''">
+					进行中
+				</li>
+				<!-- <li @click="showCompletedTasks()">已完成</li>
 				<li @click="showRecycleBin()">回收站</li>
 				<li @click="markAllAsCompleted()">全部标为已完成</li>
 				<li @click="clearCompletedTasks()">清除已完成</li>
 				<li @click="clearAllTasks()">清除全部</li>
-				<li @click="exportData()" id="li-bittom">导出数据</li>
+				<li @click="exportData()" id="li-bittom">导出数据</li> -->
 			</ul>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch } from "vue";
 // ts
 type TypeTask = {
 	content: string;
-	status: "unfinished" | "finished";
+	isFinished: boolean;
+	isDeleted: boolean;
 };
+
 const tasks = ref<TypeTask[]>([]);
-/**
- * [
- *  {content: '123', status: 'unfinished'},
- *  {content: '12', status: 'finished'},
- * ]
- */
+
 const inputValue = ref("");
-const checkBoxStatus = ref(false);
+
 const submit = () => {
 	if (inputValue.value === "") return;
 	// 类型指定
 	// 新的待办事项
 	const task: TypeTask = {
 		content: inputValue.value,
-		status: "unfinished",
+		isFinished: false,
+		isDeleted: false,
 	};
 	tasks.value.push(task);
 	inputValue.value = "";
 };
 
 const deleteTask = async (zenos: string) => {
-	const filterCallback = (item: TypeTask) => {
-		if (item.content === zenos) return false; //不留下
-		return true; //留下
-	};
-	const newArr = tasks.value.filter(filterCallback);
-
-	console.log(newArr);
-
-	tasks.value = newArr;
+	// 通过传进来的task.content，来找到点击的task对象，并将task对象中的isDeleted变成true
+	for (let i = 0; i < tasks.value.length; i++) {
+		if (tasks.value[i].content === zenos) {
+			tasks.value[i].isDeleted = true;
+		}
+	}
 };
+
+type PageContextType = "default" | "doing" | "completed" | "deleted";
+
+// let pageContext: PageContextType = "default";
+const pageContext = ref<PageContextType>("default");
+
+const isShow = (task: TypeTask) => {
+	// item.isFinished ===false && item.isDeleted === false
+	// 当页面初始化 ：item.isDeleted === false
+	// 当点击进行中 ： item.isFinished ===false && item.isDeleted === false
+	// 当点击已完成 ：item.isFinished ===true && item.isDeleted === false
+	// 当点击回收站： item.isDeleted === true
+
+	switch (pageContext.value) {
+		case "default":
+			return task.isDeleted === false;
+		case "doing":
+			return task.isFinished === false && task.isDeleted === false;
+		// case 'completed':
+	}
+};
+
+const selectAllTasks = () => {
+	pageContext.value = "default";
+};
+
+const showInProgressTasks = () => {
+	pageContext.value = "doing";
+};
+
+// watchEffect(() => {
+// 	// 监控tasks的变化
+// 	console.log(tasks.value);
+// });
+
+watch(
+	() => tasks.value.length,
+	() => console.log(tasks.value)
+);
 </script>
 
 <style scoped>
+.selected {
+	background-color: #8deeee;
+}
 .todo-container {
 	background-color: #bfefff;
 	padding: 20px;
