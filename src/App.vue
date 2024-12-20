@@ -1,52 +1,78 @@
-<script setup lang="ts">
-import { ref } from "vue";
-
-// 声明一个变量，用来储存代办事项：[]
-// 数组也是一种数据类型
-// 数据结构：数组，栈，队列，二叉树，多叉树，链表，图
-// 写一个提交按钮的点击事件，将输入框中的内容放到待办事项的变量中
-const tasks = ref<string[]>([]); // 声明一个响应式变量
-const inputValue = ref("");
-
-const submit = () => {
-	// 先获取输入框中的内容
-	// 然后将内容放到tasks数组中
-	if (inputValue.value === "") return; //结束整个函数
-
-	tasks.value.push(inputValue.value);
-	inputValue.value = "";
-};
-</script>
-
 <template>
-	<div class="todo_container">
-		<!-- <form id="todoForm"> -->
-		<input type="text" id="todoInput" placeholder="新增待办事项..." v-model="inputValue" />
-		<button type="submit" id="button_form" @click="submit">提交</button>
-		<!-- </form> -->
-		<div class="main_container">
-			<div id="button_main">全部标为完成😄</div>
+	<div class="todo-container">
+		<div class="todoForm">
+			<input type="text" id="todoInput" placeholder="新增待办事项..." v-model="inputValue" />
+			<button type="submit" id="button-form" @click="submit">提交</button>
+		</div>
+
+		<div class="main-container">
+			<button id="button-main">全部标为完成</button>
 			<div class="list">
-				<div class="list-item" v-for="task in tasks">{{ task }}</div>
+				<div class="list-item" v-for="(item, index) in tasks" :key="index">
+					{{ item.content }}
+					<input type="checkbox" id="checkbox" value=" " v-model="item.status" />
+					<button class="delete-button" @click="deleteTask(item.content)">❌</button>
+				</div>
 			</div>
 		</div>
-		<div id="task_container">
-			<ul class="task_list">
-				<li onclick="selectAllTasks()" id="li_top">全部</li>
-				<li onclick="showInProgressTasks()" id="li_second">进行中</li>
-				<li onclick="showCompletedTasks()">已完成</li>
-				<li onclick="showRecycleBin()">回收站</li>
-				<li onclick="markAllAsCompleted()">全部标为已完成</li>
-				<li onclick="clearCompletedTasks()">清除已完成</li>
-				<li onclick="clearAllTasks()">清除全部</li>
-				<li onclick="exportData()" id="li_bittom">导出数据</li>
+		<div id="task-container">
+			<ul class="task-list">
+				<li @click="selectAllTasks()" id="li-top">全部</li>
+				<li @click="showInProgressTasks()" id="li-second">进行中</li>
+				<li @click="showCompletedTasks()">已完成</li>
+				<li @click="showRecycleBin()">回收站</li>
+				<li @click="markAllAsCompleted()">全部标为已完成</li>
+				<li @click="clearCompletedTasks()">清除已完成</li>
+				<li @click="clearAllTasks()">清除全部</li>
+				<li @click="exportData()" id="li-bittom">导出数据</li>
 			</ul>
 		</div>
 	</div>
 </template>
 
+<script setup lang="ts">
+import { ref } from "vue";
+// ts
+type TypeTask = {
+	content: string;
+	status: "unfinished" | "finished";
+};
+const tasks = ref<TypeTask[]>([]);
+/**
+ * [
+ *  {content: '123', status: 'unfinished'},
+ *  {content: '12', status: 'finished'},
+ * ]
+ */
+const inputValue = ref("");
+const checkBoxStatus = ref(false);
+const submit = () => {
+	if (inputValue.value === "") return;
+	// 类型指定
+	// 新的待办事项
+	const task: TypeTask = {
+		content: inputValue.value,
+		status: "unfinished",
+	};
+	tasks.value.push(task);
+	inputValue.value = "";
+};
+
+const deleteTask = async (zenos: string) => {
+	const filterCallback = (item: TypeTask) => {
+		if (item.content === zenos) return false; //不留下
+		return true; //留下
+	};
+	const newArr = tasks.value.filter(filterCallback);
+
+	console.log(newArr);
+
+	tasks.value = newArr;
+};
+</script>
+
 <style scoped>
-.todo_container {
+.todo-container {
 	background-color: #bfefff;
 	padding: 20px;
 	border-radius: 8px;
@@ -56,7 +82,7 @@ const submit = () => {
 	width: 800px;
 }
 
-#todoForm {
+.todoForm {
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -71,18 +97,21 @@ const submit = () => {
 #todoInput {
 	flex: 1;
 	padding: 11px;
+	outline: none;
+	border: none;
 }
 
-#button_form {
+#button-form {
 	padding: 10px 20px;
 	background-color: pink;
 	color: black;
-	border: none;
 	border-radius: 0 4px 4px 0;
 	cursor: pointer;
+	outline: none;
+	border: none;
 }
 
-.main_container {
+.main-container {
 	width: 450px;
 	height: 250px;
 	margin-left: 80px;
@@ -92,13 +121,16 @@ const submit = () => {
 	box-shadow: 3px 3px 2px black;
 }
 
-#button_main {
-	float: left;
+#button-main {
+	margin-left: -300px;
 	width: 150px;
 	line-height: 35px;
 	background-color: #8deeee;
+	outline: none;
+	border: none;
 }
-#task_container {
+
+#task-container {
 	display: flex;
 	float: right;
 	margin-top: -253px;
@@ -111,19 +143,38 @@ const submit = () => {
 	box-shadow: 3px 3px 2px black;
 }
 
-.task_list {
+.task-list {
 	list-style-type: none;
 	padding: 0;
 }
 
-.task_list li {
+.task-list li {
 	padding: 10px;
 	cursor: pointer;
 	border-bottom: 1px solid #ccc;
 }
 
-#li_top {
+#li-top {
 	padding: 0;
 	padding-bottom: 10px;
+}
+
+.list-item {
+	width: 385px;
+	height: 30px;
+	margin: 10px 18px;
+	padding: 0px 15px;
+	background-color: yellow;
+	text-align: left;
+	line-height: 30px;
+}
+
+.delete-button {
+	background: rgba(0, 0, 0, 0);
+	float: right;
+	height: 30px;
+	margin-top: -7px;
+	outline: none;
+	border: none;
 }
 </style>
