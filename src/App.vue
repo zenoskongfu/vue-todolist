@@ -28,6 +28,7 @@ const addTaskFn = () => {
 onMounted(async () => {
 	const res = await getAllTasks(user_id);
 	console.log(res);
+	tasks.value = res.data.data;
 });
 </script>
 
@@ -41,7 +42,7 @@ onMounted(async () => {
 		<div class="main_container">
 			<div id="button_main">全部标为完成😄</div>
 			<div class="list">
-				<div class="list-item" v-for="task in tasks">{{ task }}</div>
+				<div class="list-item" v-for="task in tasks">{{ task.title }}</div>
 			</div>
 		</div>
 		<div id="task_container">
