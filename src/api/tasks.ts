@@ -1,18 +1,5 @@
-// 待办事项的相关接口
-
 import request from "../utils/request";
-
-// 待办事项的增删改查
-
-export interface Task {
-	id?: number;
-	title?: string;
-	description?: string;
-	completed?: boolean;
-	user_id: number;
-}
-
-const baseUrl = "/todolist";
+// 待办事项的相关接口
 
 // 查询接口
 export const getAllTasks = (user_id: number) => {
