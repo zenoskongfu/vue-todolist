@@ -32,6 +32,7 @@
 					<li @click="clearCompletedTasks()">清除已完成</li>
 					<li @click="clearAllTasks()">清除全部</li>
 					<li @click="exportData()" id="li-bittom">导出数据</li>
+					<li @click="restore()" >恢复</li>
 				</ul>
 			</div>
 		</div>
@@ -150,14 +151,27 @@ const markAllAsCompleted = async () => {
 // 清除已完成
 const clearCompletedTasks = async () => {
 	for (let i = 0; i < tasks.value.length; i++) {
-		// if()
-		tasks.value[i].isDeleted = true;
+		if (tasks.value[i].isChecked===true) {
+			tasks.value[i].isDeleted = true;
+		}
+		
 	}
 };
 
 // 清除全部
-const clearAllTasks = () => {};
-
+const clearAllTasks = () => {
+	for (let i = 0; i < tasks.value.length; i++) {
+		tasks.value[i].isDeleted = true;
+	}
+};
+// 恢复
+const restore = () =>{
+	for (let i = 0; i < tasks.value.length; i++) {
+		if (tasks.value[i].isDeleted===true) {
+			tasks.value[i].isDeleted = false;
+		}
+	}
+}
 watchEffect(() => {
 	// 监控tasks的变化
 	console.log(tasks.value.map((item) => ({ ...item })));
