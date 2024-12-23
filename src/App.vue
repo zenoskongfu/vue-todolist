@@ -21,12 +21,12 @@
 				<li @click="showInProgressTasks()" id="li-second" :class="pageContext === 'doing' ? 'selected' : ''">
 					进行中
 				</li>
-				<!-- <li @click="showCompletedTasks()">已完成</li>
-				<li @click="showRecycleBin()">回收站</li>
-				<li @click="markAllAsCompleted()">全部标为已完成</li>
+				<li @click="showCompletedTasks()" :class="pageContext === 'completed' ? 'selected' : ''">已完成</li>
+				<li @click="showRecycleBin()" :class="pageContext === 'deleted'">回收站</li>
+				<li @click="markAllAsCompleted(item.content)">全部标为已完成</li>
 				<li @click="clearCompletedTasks()">清除已完成</li>
 				<li @click="clearAllTasks()">清除全部</li>
-				<li @click="exportData()" id="li-bittom">导出数据</li> -->
+				<li @click="exportData()" id="li-bittom">导出数据</li>
 			</ul>
 		</div>
 	</div>
@@ -39,6 +39,7 @@ type TypeTask = {
 	content: string;
 	isFinished: boolean;
 	isDeleted: boolean;
+	isChecked: boolean
 };
 
 const tasks = ref<TypeTask[]>([]);
@@ -53,15 +54,16 @@ const submit = () => {
 		content: inputValue.value,
 		isFinished: false,
 		isDeleted: false,
+		isChecked: false,
 	};
 	tasks.value.push(task);
 	inputValue.value = "";
 };
 
-const deleteTask = async (zenos: string) => {
+const deleteTask = async (checkContent: string) => {
 	// 通过传进来的task.content，来找到点击的task对象，并将task对象中的isDeleted变成true
 	for (let i = 0; i < tasks.value.length; i++) {
-		if (tasks.value[i].content === zenos) {
+		if (tasks.value[i].content === checkContent) {
 			tasks.value[i].isDeleted = true;
 		}
 	}
@@ -84,7 +86,10 @@ const isShow = (task: TypeTask) => {
 			return task.isDeleted === false;
 		case "doing":
 			return task.isFinished === false && task.isDeleted === false;
-		// case 'completed':
+		case 'completed':
+			return task.isFinished === true && task.isDeleted === false;
+		case 'deleted':
+			return task.isDeleted === true;
 	}
 };
 
@@ -96,6 +101,29 @@ const showInProgressTasks = () => {
 	pageContext.value = "doing";
 };
 
+const showCompletedTasks = () => {
+	pageContext.value = "completed"
+}
+
+const showRecycleBin = () => {
+	pageContext.value = 'deleted'
+}
+
+const markAllAsCompleted = async (checkContent: string) => {
+	for (let i = 0; i < tasks.value.length; i++) {
+		if (tasks.value[i].content === checkContent) {
+			tasks.value[i].isChecked = true;
+		}
+	}
+}
+
+const clearCompletedTasks = async (checkContent: string) => {
+	for (let i = 0; i < tasks.value.length; i++) {
+		if (tasks.value[i].content === checkContent) {
+			tasks.value[i].isDeleted = true;
+		}
+	}
+}
 // watchEffect(() => {
 // 	// 监控tasks的变化
 // 	console.log(tasks.value);
@@ -111,6 +139,7 @@ watch(
 .selected {
 	background-color: #8deeee;
 }
+
 .todo-container {
 	background-color: #bfefff;
 	padding: 20px;
@@ -174,7 +203,7 @@ watch(
 	float: right;
 	margin-top: -253px;
 	width: 135px;
-	height: 364px;
+	height: 360px;
 	margin-right: 80px;
 	background-color: white;
 	border: 2px solid #4f4f4f;
@@ -199,7 +228,7 @@ watch(
 }
 
 .list-item {
-	width: 385px;
+	width: 370px;
 	height: 30px;
 	margin: 10px 18px;
 	padding: 0px 15px;
