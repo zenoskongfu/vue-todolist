@@ -10,8 +10,8 @@
 			<div class="list">
 				<div class="list-item" v-for="(item, index) in tasks" :key="index" v-show="isShow(item)">
 					{{ item.content }}
-					<input type="checkbox" id="checkbox" value=" " v-model="item.isFinished" />
-					<button class="delete-button" @click="deleteTask(item.content)">❌</button>
+					<input type="checkbox" id="checkbox" value=" " v-model="item.isChecked" />
+					<button class="delete-button" @click="deleteTask(index)">❌</button>
 				</div>
 			</div>
 		</div>
@@ -23,7 +23,7 @@
 				</li>
 				<li @click="showCompletedTasks()" :class="pageContext === 'completed' ? 'selected' : ''">已完成</li>
 				<li @click="showRecycleBin()" :class="pageContext === 'deleted'">回收站</li>
-				<li @click="markAllAsCompleted(item.content)">全部标为已完成</li>
+				<li @click="markAllAsCompleted()">全部标为已完成</li>
 				<li @click="clearCompletedTasks()">清除已完成</li>
 				<li @click="clearAllTasks()">清除全部</li>
 				<li @click="exportData()" id="li-bittom">导出数据</li>
@@ -33,13 +33,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { ref, watchEffect } from "vue";
 // ts
 type TypeTask = {
 	content: string;
-	isFinished: boolean;
 	isDeleted: boolean;
-	isChecked: boolean
+	isChecked: boolean; // 表示是否已完成
 };
 
 const tasks = ref<TypeTask[]>([]);
@@ -52,7 +51,6 @@ const submit = () => {
 	// 新的待办事项
 	const task: TypeTask = {
 		content: inputValue.value,
-		isFinished: false,
 		isDeleted: false,
 		isChecked: false,
 	};
@@ -60,18 +58,13 @@ const submit = () => {
 	inputValue.value = "";
 };
 
-const deleteTask = async (checkContent: string) => {
-	// 通过传进来的task.content，来找到点击的task对象，并将task对象中的isDeleted变成true
-	for (let i = 0; i < tasks.value.length; i++) {
-		if (tasks.value[i].content === checkContent) {
-			tasks.value[i].isDeleted = true;
-		}
-	}
+const deleteTask = async (clickIndex: number) => {
+	// filter
+	tasks.value[clickIndex].isDeleted = true;
 };
 
 type PageContextType = "default" | "doing" | "completed" | "deleted";
 
-// let pageContext: PageContextType = "default";
 const pageContext = ref<PageContextType>("default");
 
 const isShow = (task: TypeTask) => {
@@ -85,10 +78,10 @@ const isShow = (task: TypeTask) => {
 		case "default":
 			return task.isDeleted === false;
 		case "doing":
-			return task.isFinished === false && task.isDeleted === false;
-		case 'completed':
-			return task.isFinished === true && task.isDeleted === false;
-		case 'deleted':
+			return task.isChecked === false && task.isDeleted === false;
+		case "completed":
+			return task.isChecked === true && task.isDeleted === false;
+		case "deleted":
 			return task.isDeleted === true;
 	}
 };
@@ -102,37 +95,29 @@ const showInProgressTasks = () => {
 };
 
 const showCompletedTasks = () => {
-	pageContext.value = "completed"
-}
+	pageContext.value = "completed";
+};
 
 const showRecycleBin = () => {
-	pageContext.value = 'deleted'
-}
+	pageContext.value = "deleted";
+};
 
-const markAllAsCompleted = async (checkContent: string) => {
+const markAllAsCompleted = async () => {
 	for (let i = 0; i < tasks.value.length; i++) {
-		if (tasks.value[i].content === checkContent) {
-			tasks.value[i].isChecked = true;
-		}
+		tasks.value[i].isChecked = true;
 	}
-}
+};
 
-const clearCompletedTasks = async (checkContent: string) => {
+const clearCompletedTasks = async () => {
 	for (let i = 0; i < tasks.value.length; i++) {
-		if (tasks.value[i].content === checkContent) {
-			tasks.value[i].isDeleted = true;
-		}
+		tasks.value[i].isDeleted = true;
 	}
-}
-// watchEffect(() => {
-// 	// 监控tasks的变化
-// 	console.log(tasks.value);
-// });
+};
 
-watch(
-	() => tasks.value.length,
-	() => console.log(tasks.value)
-);
+watchEffect(() => {
+	// 监控tasks的变化
+	console.log(tasks.value.map((item) => ({ ...item })));
+});
 </script>
 
 <style scoped>
