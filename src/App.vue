@@ -4,30 +4,36 @@
 			<input type="text" id="todoInput" placeholder="新增待办事项..." v-model="inputValue" />
 			<button type="submit" id="button-form" @click="submit">提交</button>
 		</div>
-
-		<div class="main-container">
-			<button id="button-main">全部标为完成</button>
-			<div class="list">
-				<div class="list-item" v-for="(item, index) in tasks" :key="index" v-show="isShow(item)">
-					{{ item.content }}
-					<input type="checkbox" id="checkbox" value=" " v-model="item.isChecked" />
-					<button class="delete-button" @click="deleteTask(index)">❌</button>
+		<div class="todo-body-container">
+			<div class="main-container">
+				<button id="button-main" @click="markAllAsCompleted()">全部标为完成</button>
+				<div class="list">
+					<div class="list-item" v-for="(item, index) in tasks" :key="index" v-show="isShow(item)">
+						{{ item.content }}
+						<input type="checkbox" id="checkbox" value=" " v-model="item.isChecked" />
+						<button class="delete-button" @click="deleteTask(index)">❌</button>
+					</div>
 				</div>
 			</div>
-		</div>
-		<div id="task-container">
-			<ul class="task-list">
-				<li @click="selectAllTasks()" id="li-top" :class="pageContext === 'default' ? 'selected' : ''">全部</li>
-				<li @click="showInProgressTasks()" id="li-second" :class="pageContext === 'doing' ? 'selected' : ''">
-					进行中
-				</li>
-				<li @click="showCompletedTasks()" :class="pageContext === 'completed' ? 'selected' : ''">已完成</li>
-				<li @click="showRecycleBin()" :class="pageContext === 'deleted'">回收站</li>
-				<li @click="markAllAsCompleted()">全部标为已完成</li>
-				<li @click="clearCompletedTasks()">清除已完成</li>
-				<li @click="clearAllTasks()">清除全部</li>
-				<li @click="exportData()" id="li-bittom">导出数据</li>
-			</ul>
+			<div id="task-container">
+				<ul class="task-list">
+					<li @click="selectAllTasks()" id="li-top" :class="pageContext === 'default' ? 'selected' : ''">
+						全部
+					</li>
+					<li
+						@click="showInProgressTasks()"
+						id="li-second"
+						:class="pageContext === 'doing' ? 'selected' : ''">
+						进行中
+					</li>
+					<li @click="showCompletedTasks()" :class="pageContext === 'completed' ? 'selected' : ''">已完成</li>
+					<li @click="showRecycleBin()" :class="pageContext === 'deleted'">回收站</li>
+					<li @click="markAllAsCompleted()">全部标为已完成</li>
+					<li @click="clearCompletedTasks()">清除已完成</li>
+					<li @click="clearAllTasks()">清除全部</li>
+					<li @click="exportData()" id="li-bittom">导出数据</li>
+				</ul>
+			</div>
 		</div>
 	</div>
 </template>
@@ -41,7 +47,40 @@ type TypeTask = {
 	isChecked: boolean; // 表示是否已完成
 };
 
-const tasks = ref<TypeTask[]>([]);
+const data: TypeTask[] = [
+	{
+		content: "吃饭",
+		isChecked: false,
+		isDeleted: false,
+	},
+	{
+		content: "学习",
+		isChecked: false,
+		isDeleted: false,
+	},
+	{
+		content: "睡觉",
+		isChecked: false,
+		isDeleted: false,
+	},
+	{
+		content: "吃饭",
+		isChecked: false,
+		isDeleted: false,
+	},
+	{
+		content: "学习",
+		isChecked: false,
+		isDeleted: false,
+	},
+	{
+		content: "睡觉",
+		isChecked: false,
+		isDeleted: false,
+	},
+];
+
+const tasks = ref<TypeTask[]>(data);
 
 const inputValue = ref("");
 
@@ -108,11 +147,16 @@ const markAllAsCompleted = async () => {
 	}
 };
 
+// 清除已完成
 const clearCompletedTasks = async () => {
 	for (let i = 0; i < tasks.value.length; i++) {
+		// if()
 		tasks.value[i].isDeleted = true;
 	}
 };
+
+// 清除全部
+const clearAllTasks = () => {};
 
 watchEffect(() => {
 	// 监控tasks的变化
@@ -121,6 +165,21 @@ watchEffect(() => {
 </script>
 
 <style scoped>
+.list {
+	max-height: 325px;
+	overflow: auto;
+	width: 95%;
+	margin-left: 10px;
+	margin-bottom: 10px;
+	margin-top: 10px;
+}
+
+.todo-body-container {
+	display: flex;
+	justify-content: center;
+	margin-top: 26px;
+}
+
 .selected {
 	background-color: #8deeee;
 }
@@ -166,9 +225,7 @@ watchEffect(() => {
 
 .main-container {
 	width: 450px;
-	height: 250px;
-	margin-left: 80px;
-	margin-top: 30px;
+	min-height: 250px;
 	border: 2px solid #4f4f4f;
 	border-radius: 7px;
 	box-shadow: 3px 3px 2px black;
@@ -185,11 +242,12 @@ watchEffect(() => {
 
 #task-container {
 	display: flex;
-	float: right;
-	margin-top: -253px;
+	margin-left: 7%;
+	/* float: right; */
+	/* margin-top: -253px; */
 	width: 135px;
 	height: 360px;
-	margin-right: 80px;
+	/* margin-right: 80px; */
 	background-color: white;
 	border: 2px solid #4f4f4f;
 	border-radius: 7px;
