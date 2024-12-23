@@ -32,7 +32,7 @@
 					<li @click="clearCompletedTasks()">清除已完成</li>
 					<li @click="clearAllTasks()">清除全部</li>
 					<li @click="exportData()" id="li-bittom">导出数据</li>
-					<li @click="restore()" >恢复</li>
+					<li @click="restore()">恢复</li>
 				</ul>
 			</div>
 		</div>
@@ -40,7 +40,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watchEffect } from "vue";
+import { onMounted, ref, watchEffect } from "vue";
+import { addTask, getAllTasks } from "./api/tasks";
 // ts
 type TypeTask = {
 	content: string;
@@ -48,42 +49,29 @@ type TypeTask = {
 	isChecked: boolean; // 表示是否已完成
 };
 
-const data: TypeTask[] = [
-	{
-		content: "吃饭",
-		isChecked: false,
-		isDeleted: false,
-	},
-	{
-		content: "学习",
-		isChecked: false,
-		isDeleted: false,
-	},
-	{
-		content: "睡觉",
-		isChecked: false,
-		isDeleted: false,
-	},
-	{
-		content: "吃饭",
-		isChecked: false,
-		isDeleted: false,
-	},
-	{
-		content: "学习",
-		isChecked: false,
-		isDeleted: false,
-	},
-	{
-		content: "睡觉",
-		isChecked: false,
-		isDeleted: false,
-	},
-];
-
-const tasks = ref<TypeTask[]>(data);
+const tasks = ref<TypeTask[]>([]);
 
 const inputValue = ref("");
+
+onMounted(async () => {
+	// 页面初始化的逻辑
+	const res = await getAllTasks(1);
+	console.log(res);
+	const _tasks = res.data.data;
+
+	// 临时数组
+	const temp: any = [];
+	_tasks.map((task: any) => {
+		temp.push({
+			content: task.title,
+			isDeleted: task.isDeleted,
+			isChecked: task.isCompleted,
+		});
+	});
+
+	// 赋值给页面上显示的变量
+	tasks.value = temp;
+});
 
 const submit = () => {
 	if (inputValue.value === "") return;
@@ -95,6 +83,14 @@ const submit = () => {
 		isChecked: false,
 	};
 	tasks.value.push(task);
+
+	// 访问添加接口的api
+	// 添加是否成功
+	// 如果成功，在页面上弹框显示 “添加成功”
+	// 如果失败，在页面上弹框显示 “添加失败”
+	addTask(1, inputValue.value);
+
+	// 清空输入框
 	inputValue.value = "";
 };
 
@@ -151,10 +147,9 @@ const markAllAsCompleted = async () => {
 // 清除已完成
 const clearCompletedTasks = async () => {
 	for (let i = 0; i < tasks.value.length; i++) {
-		if (tasks.value[i].isChecked===true) {
+		if (tasks.value[i].isChecked === true) {
 			tasks.value[i].isDeleted = true;
 		}
-		
 	}
 };
 
@@ -165,13 +160,13 @@ const clearAllTasks = () => {
 	}
 };
 // 恢复
-const restore = () =>{
+const restore = () => {
 	for (let i = 0; i < tasks.value.length; i++) {
-		if (tasks.value[i].isDeleted===true) {
+		if (tasks.value[i].isDeleted === true) {
 			tasks.value[i].isDeleted = false;
 		}
 	}
-}
+};
 watchEffect(() => {
 	// 监控tasks的变化
 	console.log(tasks.value.map((item) => ({ ...item })));

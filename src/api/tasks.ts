@@ -14,22 +14,18 @@ export interface Task {
 
 const baseUrl = "/todolist";
 
-export const addTask = (task: Task) => {
-	const url = `${baseUrl}/add`;
-	return request.post(url, task);
-};
-
-export const deleteTask = (id: number, user_id: number) => {
-	const url = `${baseUrl}/delete`;
-	return request.delete(url, { data: { id, user_id } });
-};
-
+// 查询接口
 export const getAllTasks = (user_id: number) => {
-	const url = `${baseUrl}/allTask?user_id=${user_id}`;
+	const url = `/tasks?user_id=${user_id}`; // isCompleted, isDeleted
 	return request.get(url);
 };
 
-export const updateTask = (task: Task) => {
-	const url = `${baseUrl}/update`;
-	return request.post(url, task);
+// 添加接口
+export const addTask = (user_id: number, title: string) => {
+	const url = "/tasks";
+	const data = {
+		user_id,
+		title,
+	};
+	return request.post(url, data);
 };
