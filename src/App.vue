@@ -4,46 +4,74 @@
 			<input type="text" id="todoInput" placeholder="新增待办事项..." v-model="inputValue" />
 			<button type="submit" id="button-form" @click="submit">提交</button>
 		</div>
-
-		<div class="main-container">
-			<button id="button-main">全部标为完成</button>
-			<div class="list">
-				<div class="list-item" v-for="(item, index) in tasks" :key="index" v-show="isShow(item)">
-					{{ item.content }}
-					<input type="checkbox" id="checkbox" value=" " v-model="item.isFinished" />
-					<button class="delete-button" @click="deleteTask(item.content)">❌</button>
+		<div class="todo-body-container">
+			<div class="main-container">
+				<button id="button-main" @click="markAllAsCompleted()">全部标为完成</button>
+				<div class="list">
+					<div class="list-item" v-for="(item, index) in tasks" :key="index" v-show="isShow(item)">
+						{{ item.content }}
+						<input type="checkbox" id="checkbox" value=" " v-model="item.isChecked" />
+						<button class="delete-button" @click="deleteTask(index)">❌</button>
+					</div>
 				</div>
 			</div>
-		</div>
-		<div id="task-container">
-			<ul class="task-list">
-				<li @click="selectAllTasks()" id="li-top" :class="pageContext === 'default' ? 'selected' : ''">全部</li>
-				<li @click="showInProgressTasks()" id="li-second" :class="pageContext === 'doing' ? 'selected' : ''">
-					进行中
-				</li>
-				<!-- <li @click="showCompletedTasks()">已完成</li>
-				<li @click="showRecycleBin()">回收站</li>
-				<li @click="markAllAsCompleted()">全部标为已完成</li>
-				<li @click="clearCompletedTasks()">清除已完成</li>
-				<li @click="clearAllTasks()">清除全部</li>
-				<li @click="exportData()" id="li-bittom">导出数据</li> -->
-			</ul>
+			<div id="task-container">
+				<ul class="task-list">
+					<li @click="selectAllTasks()" id="li-top" :class="pageContext === 'default' ? 'selected' : ''">
+						全部
+					</li>
+					<li
+						@click="showInProgressTasks()"
+						id="li-second"
+						:class="pageContext === 'doing' ? 'selected' : ''">
+						进行中
+					</li>
+					<li @click="showCompletedTasks()" :class="pageContext === 'completed' ? 'selected' : ''">已完成</li>
+					<li @click="showRecycleBin()" :class="pageContext === 'deleted'">回收站</li>
+					<li @click="markAllAsCompleted()">全部标为已完成</li>
+					<li @click="clearCompletedTasks()">清除已完成</li>
+					<li @click="clearAllTasks()">清除全部</li>
+					<!-- <li @click="exportData()" id="li-bittom">导出数据</li> -->
+					<li @click="restore()">恢复</li>
+				</ul>
+			</div>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { onMounted, ref, watchEffect } from "vue";
+import { addTask, getAllTasks } from "./api/tasks";
 // ts
 type TypeTask = {
 	content: string;
-	isFinished: boolean;
 	isDeleted: boolean;
+	isChecked: boolean; // 表示是否已完成
 };
 
 const tasks = ref<TypeTask[]>([]);
 
 const inputValue = ref("");
+
+onMounted(async () => {
+	// 页面初始化的逻辑
+	const res = await getAllTasks(1);
+	console.log(res);
+	const _tasks = res.data.data;
+
+	// 临时数组
+	const temp: any = [];
+	_tasks.map((task: any) => {
+		temp.push({
+			content: task.title,
+			isDeleted: task.isDeleted,
+			isChecked: task.isCompleted,
+		});
+	});
+
+	// 赋值给页面上显示的变量
+	tasks.value = temp;
+});
 
 const submit = () => {
 	if (inputValue.value === "") return;
@@ -51,25 +79,28 @@ const submit = () => {
 	// 新的待办事项
 	const task: TypeTask = {
 		content: inputValue.value,
-		isFinished: false,
 		isDeleted: false,
+		isChecked: false,
 	};
 	tasks.value.push(task);
+
+	// 访问添加接口的api
+	// 添加是否成功
+	// 如果成功，在页面上弹框显示 “添加成功”
+	// 如果失败，在页面上弹框显示 “添加失败”
+	addTask(1, inputValue.value);
+
+	// 清空输入框
 	inputValue.value = "";
 };
 
-const deleteTask = async (zenos: string) => {
-	// 通过传进来的task.content，来找到点击的task对象，并将task对象中的isDeleted变成true
-	for (let i = 0; i < tasks.value.length; i++) {
-		if (tasks.value[i].content === zenos) {
-			tasks.value[i].isDeleted = true;
-		}
-	}
+const deleteTask = async (clickIndex: number) => {
+	// filter
+	tasks.value[clickIndex].isDeleted = true;
 };
 
 type PageContextType = "default" | "doing" | "completed" | "deleted";
 
-// let pageContext: PageContextType = "default";
 const pageContext = ref<PageContextType>("default");
 
 const isShow = (task: TypeTask) => {
@@ -83,8 +114,11 @@ const isShow = (task: TypeTask) => {
 		case "default":
 			return task.isDeleted === false;
 		case "doing":
-			return task.isFinished === false && task.isDeleted === false;
-		// case 'completed':
+			return task.isChecked === false && task.isDeleted === false;
+		case "completed":
+			return task.isChecked === true && task.isDeleted === false;
+		case "deleted":
+			return task.isDeleted === true;
 	}
 };
 
@@ -96,21 +130,69 @@ const showInProgressTasks = () => {
 	pageContext.value = "doing";
 };
 
-// watchEffect(() => {
-// 	// 监控tasks的变化
-// 	console.log(tasks.value);
-// });
+const showCompletedTasks = () => {
+	pageContext.value = "completed";
+};
 
-watch(
-	() => tasks.value.length,
-	() => console.log(tasks.value)
-);
+const showRecycleBin = () => {
+	pageContext.value = "deleted";
+};
+
+const markAllAsCompleted = async () => {
+	for (let i = 0; i < tasks.value.length; i++) {
+		tasks.value[i].isChecked = true;
+	}
+};
+
+// 清除已完成
+const clearCompletedTasks = async () => {
+	for (let i = 0; i < tasks.value.length; i++) {
+		if (tasks.value[i].isChecked === true) {
+			tasks.value[i].isDeleted = true;
+		}
+	}
+};
+
+// 清除全部
+const clearAllTasks = () => {
+	for (let i = 0; i < tasks.value.length; i++) {
+		tasks.value[i].isDeleted = true;
+	}
+};
+// 恢复
+const restore = () => {
+	for (let i = 0; i < tasks.value.length; i++) {
+		if (tasks.value[i].isDeleted === true) {
+			tasks.value[i].isDeleted = false;
+		}
+	}
+};
+watchEffect(() => {
+	// 监控tasks的变化
+	console.log(tasks.value.map((item) => ({ ...item })));
+});
 </script>
 
 <style scoped>
+.list {
+	max-height: 325px;
+	overflow: auto;
+	width: 95%;
+	margin-left: 10px;
+	margin-bottom: 10px;
+	margin-top: 10px;
+}
+
+.todo-body-container {
+	display: flex;
+	justify-content: center;
+	margin-top: 26px;
+}
+
 .selected {
 	background-color: #8deeee;
 }
+
 .todo-container {
 	background-color: #bfefff;
 	padding: 20px;
@@ -152,9 +234,7 @@ watch(
 
 .main-container {
 	width: 450px;
-	height: 250px;
-	margin-left: 80px;
-	margin-top: 30px;
+	min-height: 250px;
 	border: 2px solid #4f4f4f;
 	border-radius: 7px;
 	box-shadow: 3px 3px 2px black;
@@ -171,11 +251,12 @@ watch(
 
 #task-container {
 	display: flex;
-	float: right;
-	margin-top: -253px;
+	margin-left: 7%;
+	/* float: right; */
+	/* margin-top: -253px; */
 	width: 135px;
-	height: 364px;
-	margin-right: 80px;
+	height: 360px;
+	/* margin-right: 80px; */
 	background-color: white;
 	border: 2px solid #4f4f4f;
 	border-radius: 7px;
@@ -199,7 +280,7 @@ watch(
 }
 
 .list-item {
-	width: 385px;
+	width: 370px;
 	height: 30px;
 	margin: 10px 18px;
 	padding: 0px 15px;
