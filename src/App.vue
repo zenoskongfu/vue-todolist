@@ -140,6 +140,7 @@ const showRecycleBin = () => {
 
 const markAllAsCompleted = async () => {
 	for (let i = 0; i < tasks.value.length; i++) {
+		// 检查是否已经完成，找出没有完成的
 		tasks.value[i].isChecked = true;
 	}
 };
