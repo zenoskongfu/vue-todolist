@@ -1,40 +1,48 @@
 <template>
-	<div class="todo-container">
-		<div class="todoForm">
-			<input type="text" id="todoInput" placeholder="新增待办事项..." v-model="inputValue" />
-			<button type="submit" id="button-form" @click="submit">提交</button>
-		</div>
-		<div class="todo-body-container">
-			<div class="main-container">
-				<button id="button-main" @click="markAllAsCompleted()">全部标为完成</button>
-				<div class="list">
-					<div class="list-item" v-for="(item, index) in tasks" :key="index" v-show="isShow(item)">
-						{{ item.content }}
-						<input type="checkbox" id="checkbox" value=" " v-model="item.isChecked" />
-						<button class="delete-button" @click="deleteTask(index)">❌</button>
+	<div class="app-container">
+		<div class="todo-container">
+			<div class="todoForm">
+				<input type="text" id="todoInput" placeholder="新增待办事项..." v-model="inputValue" />
+				<button type="submit" id="button-form" @click="submit">提交</button>
+			</div>
+			<div class="todo-body-container">
+				<div class="main-container">
+					<button id="button-main" @click="markAllAsCompleted()">全部标为完成</button>
+					<div class="list">
+						<div class="list-item" v-for="(item, index) in tasks" :key="index" v-show="isShow(item)">
+							{{ item.content }}
+							<input type="checkbox" id="checkbox" value=" " v-model="item.isChecked" />
+							<button class="delete-button" @click="deleteTask(index)">❌</button>
+						</div>
 					</div>
 				</div>
+				<div id="task-container">
+					<ul class="task-list">
+						<li @click="selectAllTasks()" id="li-top" :class="pageContext === 'default' ? 'selected' : ''">
+							全部
+						</li>
+						<li
+							@click="showInProgressTasks()"
+							id="li-second"
+							:class="pageContext === 'doing' ? 'selected' : ''">
+							进行中
+						</li>
+						<li @click="showCompletedTasks()" :class="pageContext === 'completed' ? 'selected' : ''">
+							已完成
+						</li>
+						<li @click="showRecycleBin()" :class="pageContext === 'deleted'">回收站</li>
+						<li @click="markAllAsCompleted()">全部标为已完成</li>
+						<li @click="clearCompletedTasks()">清除已完成</li>
+						<li @click="clearAllTasks()">清除全部</li>
+						<!-- <li @click="exportData()" id="li-bittom">导出数据</li> -->
+						<li @click="restore()">恢复</li>
+					</ul>
+				</div>
 			</div>
-			<div id="task-container">
-				<ul class="task-list">
-					<li @click="selectAllTasks()" id="li-top" :class="pageContext === 'default' ? 'selected' : ''">
-						全部
-					</li>
-					<li
-						@click="showInProgressTasks()"
-						id="li-second"
-						:class="pageContext === 'doing' ? 'selected' : ''">
-						进行中
-					</li>
-					<li @click="showCompletedTasks()" :class="pageContext === 'completed' ? 'selected' : ''">已完成</li>
-					<li @click="showRecycleBin()" :class="pageContext === 'deleted'">回收站</li>
-					<li @click="markAllAsCompleted()">全部标为已完成</li>
-					<li @click="clearCompletedTasks()">清除已完成</li>
-					<li @click="clearAllTasks()">清除全部</li>
-					<!-- <li @click="exportData()" id="li-bittom">导出数据</li> -->
-					<li @click="restore()">恢复</li>
-				</ul>
-			</div>
+		</div>
+		<div style="height: 120px"></div>
+		<div class="footer">
+			<BeiAnFooter author="WangShiDi & Zenos" github="https://github.com/zenoskongfu/vue-todolist"></BeiAnFooter>
 		</div>
 	</div>
 </template>
@@ -42,6 +50,7 @@
 <script setup lang="ts">
 import { onMounted, ref, watchEffect } from "vue";
 import { addTask, getAllTasks } from "./api/tasks";
+import { BeiAnFooter } from "blue-vue-ui";
 // ts
 type TypeTask = {
 	content: string;
@@ -175,6 +184,14 @@ watchEffect(() => {
 </script>
 
 <style scoped>
+.app-container {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+.footer {
+	margin-top: auto;
+}
 .list {
 	max-height: 325px;
 	overflow: auto;
@@ -196,12 +213,13 @@ watchEffect(() => {
 
 .todo-container {
 	background-color: #bfefff;
-	padding: 20px;
 	border-radius: 8px;
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 	text-align: center;
 	height: 500px;
+	max-width: 90vw;
 	width: 800px;
+	margin: 10px auto;
 }
 
 .todoForm {
