@@ -217,7 +217,6 @@ watchEffect(() => {
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 	text-align: center;
 	height: 500px;
-	max-width: 90vw;
 	width: 800px;
 	margin: 10px auto;
 }
