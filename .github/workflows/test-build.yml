@@ -1,0 +1,24 @@
+on:
+    push:
+        branches:
+            - "**"
+            - "!main"
+            - "!develop"
+
+jobs:
+    test-build:
+        name: Test Build
+        runs-on: ubuntu-latest
+        environment:
+            name: test-build
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+            - name: Install
+              run: npm i
+            - name: Build
+              run: npm run build
+            - name: Test End
+              run: |
+                  echo "Test End"
+                  echo "Test Successful"

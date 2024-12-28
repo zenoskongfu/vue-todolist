@@ -6,6 +6,13 @@ export default defineConfig({
 	base: "/todolist",
 	plugins: [vue()],
 	server: {
-		port: 80,
+		port: 8088,
+		proxy: {
+			"/api": {
+				target: "http://qdsj.top:3000",
+				changeOrigin: true,
+				rewrite: (path) => path.replace(/^\/api/, ""),
+			},
+		},
 	},
 });

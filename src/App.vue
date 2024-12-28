@@ -1,106 +1,109 @@
 <template>
-	<div class="todo-container">
-		<div class="todoForm">
-			<input type="text" id="todoInput" placeholder="新增待办事项..." v-model="inputValue" />
-			<button type="submit" id="button-form" @click="submit">提交</button>
-		</div>
-		<div class="todo-body-container">
-			<div class="main-container">
-				<button id="button-main" @click="markAllAsCompleted()">全部标为完成</button>
-				<div class="list">
-					<div class="list-item" v-for="(item, index) in tasks" :key="index" v-show="isShow(item)">
-						{{ item.content }}
-						<input type="checkbox" id="checkbox" value=" " v-model="item.isChecked" />
-						<button class="delete-button" @click="deleteTask(index)">❌</button>
+	<div class="app-container">
+		<div class="todo-container">
+			<div class="todoForm">
+				<input type="text" id="todoInput" placeholder="新增待办事项..." v-model="inputValue" />
+				<button type="submit" id="button-form" @click="submit">提交</button>
+			</div>
+			<div class="todo-body-container">
+				<div class="main-container">
+					<button id="button-main" @click="markAllAsCompleted()">全部标为完成</button>
+					<div class="list">
+						<div class="list-item" v-for="(item, index) in tasks" :key="index" v-show="isShow(item)">
+							{{ item.content }}
+							<input type="checkbox" id="checkbox" value=" " v-model="item.isChecked" />
+							<button class="delete-button" @click="deleteTask(item.id)">❌</button>
+						</div>
 					</div>
 				</div>
+				<div id="task-container">
+					<ul class="task-list">
+						<li @click="selectAllTasks()" id="li-top" :class="pageContext === 'default' ? 'selected' : ''">
+							全部
+						</li>
+						<li
+							@click="showInProgressTasks()"
+							id="li-second"
+							:class="pageContext === 'doing' ? 'selected' : ''">
+							进行中
+						</li>
+						<li @click="showCompletedTasks()" :class="pageContext === 'completed' ? 'selected' : ''">
+							已完成
+						</li>
+						<li @click="showRecycleBin()" :class="pageContext === 'deleted'">回收站</li>
+						<li @click="markAllAsCompleted()">全部标为已完成</li>
+						<li @click="clearCompletedTasks()">清除已完成</li>
+						<li @click="clearAllTasks()">清除全部</li>
+						<!-- <li @click="exportData()" id="li-bittom">导出数据</li> -->
+						<li @click="restore()">恢复</li>
+					</ul>
+				</div>
 			</div>
-			<div id="task-container">
-				<ul class="task-list">
-					<li @click="selectAllTasks()" id="li-top" :class="pageContext === 'default' ? 'selected' : ''">
-						全部
-					</li>
-					<li
-						@click="showInProgressTasks()"
-						id="li-second"
-						:class="pageContext === 'doing' ? 'selected' : ''">
-						进行中
-					</li>
-					<li @click="showCompletedTasks()" :class="pageContext === 'completed' ? 'selected' : ''">已完成</li>
-					<li @click="showRecycleBin()" :class="pageContext === 'deleted'">回收站</li>
-					<li @click="markAllAsCompleted()">全部标为已完成</li>
-					<li @click="clearCompletedTasks()">清除已完成</li>
-					<li @click="clearAllTasks()">清除全部</li>
-					<li @click="exportData()" id="li-bittom">导出数据</li>
-					<li @click="restore()" >恢复</li>
-				</ul>
-			</div>
+		</div>
+		<div style="height: 120px"></div>
+		<div class="footer">
+			<BeiAnFooter author="WangShiDi & Zenos" github="https://github.com/zenoskongfu/vue-todolist"></BeiAnFooter>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
-import { ref, watchEffect } from "vue";
+import { onMounted, ref, watchEffect } from "vue";
+import { addTask, getAllTasks } from "./api/tasks";
+import { BeiAnFooter } from "blue-vue-ui";
 // ts
 type TypeTask = {
+	id: number;
 	content: string;
 	isDeleted: boolean;
 	isChecked: boolean; // 表示是否已完成
 };
 
-const data: TypeTask[] = [
-	{
-		content: "吃饭",
-		isChecked: false,
-		isDeleted: false,
-	},
-	{
-		content: "学习",
-		isChecked: false,
-		isDeleted: false,
-	},
-	{
-		content: "睡觉",
-		isChecked: false,
-		isDeleted: false,
-	},
-	{
-		content: "吃饭",
-		isChecked: false,
-		isDeleted: false,
-	},
-	{
-		content: "学习",
-		isChecked: false,
-		isDeleted: false,
-	},
-	{
-		content: "睡觉",
-		isChecked: false,
-		isDeleted: false,
-	},
-];
-
-const tasks = ref<TypeTask[]>(data);
+const tasks = ref<TypeTask[]>([]);
 
 const inputValue = ref("");
 
+const newFn = () => {
+	// 获取所有待办事项
+	getAllTasks(1).then((res) => {
+		const _tasks = res.data;
+		const temp: any = [];
+		_tasks.map((task: any) => {
+			temp.push({
+				id: task.id,
+				content: task.title,
+				isDeleted: task.isDeleted,
+				isChecked: task.isCompleted,
+			});
+		});
+		tasks.value = temp;
+	});
+};
+
+onMounted(() => {
+	newFn();
+});
+
 const submit = () => {
 	if (inputValue.value === "") return;
-	// 类型指定
-	// 新的待办事项
-	const task: TypeTask = {
-		content: inputValue.value,
-		isDeleted: false,
-		isChecked: false,
-	};
-	tasks.value.push(task);
+
+	addTask(1, inputValue.value).then(() => {
+		// 这里调用的代码，就是接口响应之后
+		newFn();
+	});
+
+	// 这里调用的代码，就是接口响应之前，会执行的代码
+	// 清空输入框
 	inputValue.value = "";
 };
 
-const deleteTask = async (clickIndex: number) => {
-	// filter
-	tasks.value[clickIndex].isDeleted = true;
+const deleteTask = async (taskId: number) => {
+	// for
+	tasks.value.map((item) => {
+		if (item.id === taskId) {
+			item.isDeleted = true;
+		}
+	});
 };
 
 type PageContextType = "default" | "doing" | "completed" | "deleted";
@@ -144,6 +147,7 @@ const showRecycleBin = () => {
 
 const markAllAsCompleted = async () => {
 	for (let i = 0; i < tasks.value.length; i++) {
+		// 检查是否已经完成，找出没有完成的
 		tasks.value[i].isChecked = true;
 	}
 };
@@ -151,10 +155,9 @@ const markAllAsCompleted = async () => {
 // 清除已完成
 const clearCompletedTasks = async () => {
 	for (let i = 0; i < tasks.value.length; i++) {
-		if (tasks.value[i].isChecked===true) {
+		if (tasks.value[i].isChecked === true) {
 			tasks.value[i].isDeleted = true;
 		}
-		
 	}
 };
 
@@ -164,14 +167,16 @@ const clearAllTasks = () => {
 		tasks.value[i].isDeleted = true;
 	}
 };
+
 // 恢复
-const restore = () =>{
+const restore = () => {
 	for (let i = 0; i < tasks.value.length; i++) {
-		if (tasks.value[i].isDeleted===true) {
+		if (tasks.value[i].isDeleted === true) {
 			tasks.value[i].isDeleted = false;
 		}
 	}
-}
+};
+
 watchEffect(() => {
 	// 监控tasks的变化
 	console.log(tasks.value.map((item) => ({ ...item })));
@@ -179,6 +184,14 @@ watchEffect(() => {
 </script>
 
 <style scoped>
+.app-container {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+.footer {
+	margin-top: auto;
+}
 .list {
 	max-height: 325px;
 	overflow: auto;
@@ -200,12 +213,12 @@ watchEffect(() => {
 
 .todo-container {
 	background-color: #bfefff;
-	padding: 20px;
 	border-radius: 8px;
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 	text-align: center;
 	height: 500px;
 	width: 800px;
+	margin: 10px auto;
 }
 
 .todoForm {
