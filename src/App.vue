@@ -12,7 +12,7 @@
 						<div class="list-item" v-for="(item, index) in tasks" :key="index" v-show="isShow(item)">
 							{{ item.content }}
 							<input type="checkbox" id="checkbox" value=" " v-model="item.isChecked" />
-							<button class="delete-button" @click="deleteTask(index)">❌</button>
+							<button class="delete-button" @click="deleteTask(item.id)">❌</button>
 						</div>
 					</div>
 				</div>
@@ -53,6 +53,7 @@ import { addTask, getAllTasks } from "./api/tasks";
 import { BeiAnFooter } from "blue-vue-ui";
 // ts
 type TypeTask = {
+	id: number;
 	content: string;
 	isDeleted: boolean;
 	isChecked: boolean; // 表示是否已完成
@@ -62,54 +63,47 @@ const tasks = ref<TypeTask[]>([]);
 
 const inputValue = ref("");
 
-onMounted(async () => {
-	// 页面初始化的逻辑
-	// axios得到的res，和我用fetch得到的res（最原始的服务器的响应数据）是不同的
-	// axios得到的res会有更多的内容，因为axios会对res进行自定义
+const newFn = () => {
+	// 获取所有待办事项
 	getAllTasks(1).then((res) => {
-		// res 是接口返回的数据，我拿到了！！！
-		console.log("app res: ", res);
-
 		const _tasks = res.data;
-		// // 临时数组
 		const temp: any = [];
 		_tasks.map((task: any) => {
 			temp.push({
+				id: task.id,
 				content: task.title,
 				isDeleted: task.isDeleted,
 				isChecked: task.isCompleted,
 			});
 		});
-
-		// // 赋值给页面上显示的变量
 		tasks.value = temp;
 	});
+};
+
+onMounted(() => {
+	newFn();
 });
 
 const submit = () => {
 	if (inputValue.value === "") return;
-	// 类型指定
-	// 新的待办事项
-	const task: TypeTask = {
-		content: inputValue.value,
-		isDeleted: false,
-		isChecked: false,
-	};
-	tasks.value.push(task);
 
-	// 访问添加接口的api
-	// 添加是否成功
-	// 如果成功，在页面上弹框显示 “添加成功”
-	// 如果失败，在页面上弹框显示 “添加失败”
-	addTask(1, inputValue.value);
+	addTask(1, inputValue.value).then(() => {
+		// 这里调用的代码，就是接口响应之后
+		newFn();
+	});
 
+	// 这里调用的代码，就是接口响应之前，会执行的代码
 	// 清空输入框
 	inputValue.value = "";
 };
 
-const deleteTask = async (clickIndex: number) => {
-	// filter
-	tasks.value[clickIndex].isDeleted = true;
+const deleteTask = async (taskId: number) => {
+	// for
+	tasks.value.map((item) => {
+		if (item.id === taskId) {
+			item.isDeleted = true;
+		}
+	});
 };
 
 type PageContextType = "default" | "doing" | "completed" | "deleted";
