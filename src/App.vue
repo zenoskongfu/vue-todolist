@@ -64,22 +64,26 @@ const inputValue = ref("");
 
 onMounted(async () => {
 	// 页面初始化的逻辑
-	const res = await getAllTasks(1);
-	console.log(res);
-	const _tasks = res.data.data;
+	// axios得到的res，和我用fetch得到的res（最原始的服务器的响应数据）是不同的
+	// axios得到的res会有更多的内容，因为axios会对res进行自定义
+	getAllTasks(1).then((res) => {
+		// res 是接口返回的数据，我拿到了！！！
+		console.log("app res: ", res);
 
-	// 临时数组
-	const temp: any = [];
-	_tasks.map((task: any) => {
-		temp.push({
-			content: task.title,
-			isDeleted: task.isDeleted,
-			isChecked: task.isCompleted,
+		const _tasks = res.data;
+		// // 临时数组
+		const temp: any = [];
+		_tasks.map((task: any) => {
+			temp.push({
+				content: task.title,
+				isDeleted: task.isDeleted,
+				isChecked: task.isCompleted,
+			});
 		});
-	});
 
-	// 赋值给页面上显示的变量
-	tasks.value = temp;
+		// // 赋值给页面上显示的变量
+		tasks.value = temp;
+	});
 });
 
 const submit = () => {
@@ -169,6 +173,7 @@ const clearAllTasks = () => {
 		tasks.value[i].isDeleted = true;
 	}
 };
+
 // 恢复
 const restore = () => {
 	for (let i = 0; i < tasks.value.length; i++) {
@@ -177,6 +182,7 @@ const restore = () => {
 		}
 	}
 };
+
 watchEffect(() => {
 	// 监控tasks的变化
 	console.log(tasks.value.map((item) => ({ ...item })));

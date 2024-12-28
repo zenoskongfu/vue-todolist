@@ -2,9 +2,18 @@ import request from "../utils/request";
 // 待办事项的相关接口
 
 // 查询接口
+
+// 1. 该函数返回一个promise
+// 2. 该promise的值是接口响应的数据
 export const getAllTasks = (user_id: number) => {
-	const url = `/tasks?user_id=${user_id}`; // isCompleted, isDeleted
-	return request.get(url);
+	const url = `/api/tasks?user_id=${user_id}`; // isCompleted, isDeleted
+	// 用fetch发起一个Get类型的请求
+	return fetch(url)
+		.then((res) => res.json())
+		.then((res) => {
+			console.log(res); //接口返回的数据
+			return res;
+		});
 };
 
 // 添加接口
