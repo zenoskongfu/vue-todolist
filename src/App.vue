@@ -11,8 +11,10 @@
 					<div class="list">
 						<div class="list-item" v-for="(item, index) in tasks" :key="index" v-show="isShow(item)">
 							{{ item.content }}
-							<input type="checkbox" id="checkbox" value=" " v-model="item.isChecked" />
-							<button class="delete-button" @click="deleteTask(item.id)">❌</button>
+							<input type="checkbox" id="checkbox" value=" " v-model="item.isChecked" v-show="isChecked"/>
+							
+							<button class="delete-button" @click="deleteTask(item.id)" v-show="isVisible">❌</button>
+							<button class="restore-button" @click="restoreDelete(item.id)" v-show="isRestore">恢复</button>
 						</div>
 					</div>
 				</div>
@@ -63,6 +65,12 @@ const tasks = ref<TypeTask[]>([]);
 
 const inputValue = ref("");
 
+const isVisible = ref(true);
+
+const isRestore = ref(false);
+
+const isChecked = ref(true);
+
 const newFn = () => {
 	// 获取所有待办事项
 	getAllTasks(1).then((res) => {
@@ -102,9 +110,22 @@ const deleteTask = async (taskId: number) => {
 	tasks.value.map((item) => {
 		if (item.id === taskId) {
 			item.isDeleted = true;
+			isVisible.value=true;
+			isRestore.value=false;
 		}
 	});
 };
+
+const restoreDelete = async (taskId:number) =>{
+	tasks.value.map((item)=>{
+	if (item.id === taskId) {
+			item.isDeleted = false;
+			isVisible.value=true;
+
+	}
+		});
+	};
+
 
 type PageContextType = "default" | "doing" | "completed" | "deleted";
 
@@ -129,26 +150,44 @@ const isShow = (task: TypeTask) => {
 	}
 };
 
+// 全选
 const selectAllTasks = () => {
 	pageContext.value = "default";
+	isVisible.value=true;
+	isRestore.value= false;
+	isChecked.value= true;
 };
 
+// 正在进行的任务
 const showInProgressTasks = () => {
 	pageContext.value = "doing";
+	isVisible.value=true;
+	isRestore.value= false;
+	isChecked.value= true;
 };
 
+// 已完成的任务
 const showCompletedTasks = () => {
 	pageContext.value = "completed";
+	isVisible.value=true;
+	isRestore.value= false;
+	isChecked.value= false;
 };
 
+// 回收站
 const showRecycleBin = () => {
 	pageContext.value = "deleted";
+	isVisible.value = false;
+	isRestore.value = true;
+	isChecked.value= false;
 };
 
+// 全部标记为完成
 const markAllAsCompleted = async () => {
 	for (let i = 0; i < tasks.value.length; i++) {
 		// 检查是否已经完成，找出没有完成的
 		tasks.value[i].isChecked = true;
+		// isVisible.value=true;
 	}
 };
 
@@ -159,6 +198,7 @@ const clearCompletedTasks = async () => {
 			tasks.value[i].isDeleted = true;
 		}
 	}
+	isVisible.value=true;
 };
 
 // 清除全部
@@ -166,6 +206,7 @@ const clearAllTasks = () => {
 	for (let i = 0; i < tasks.value.length; i++) {
 		tasks.value[i].isDeleted = true;
 	}
+	isVisible.value=true;
 };
 
 // 恢复
@@ -315,4 +356,16 @@ watchEffect(() => {
 	outline: none;
 	border: none;
 }
+
+.restore-button{
+	/* background: rgba(0, 0, 0, 0); */
+	float: right;
+	height: 30px;
+	margin-top: -7px;
+	outline: none;
+	/* border: none; */
+	margin-top: 1px;
+	height: 25px;
+}
+
 </style>
