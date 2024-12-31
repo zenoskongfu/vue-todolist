@@ -84,8 +84,7 @@ onMounted(async () => {
 
 const submit = () => {
 	if (inputValue.value === "") return;
-	// 类型指定
-	// 新的待办事项
+
 	const task: TypeTask = {
 		content: inputValue.value,
 		isDeleted: false,
@@ -94,9 +93,6 @@ const submit = () => {
 	tasks.value.push(task);
 
 	// 访问添加接口的api
-	// 添加是否成功
-	// 如果成功，在页面上弹框显示 “添加成功”
-	// 如果失败，在页面上弹框显示 “添加失败”
 	addTask(1, inputValue.value);
 
 	// 清空输入框
@@ -104,7 +100,6 @@ const submit = () => {
 };
 
 const deleteTask = async (clickIndex: number) => {
-	// filter
 	tasks.value[clickIndex].isDeleted = true;
 };
 
