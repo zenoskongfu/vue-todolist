@@ -11,10 +11,17 @@
 					<div class="list">
 						<div class="list-item" v-for="(item, index) in tasks" :key="index" v-show="isShow(item)">
 							{{ item.content }}
-							<input type="checkbox" id="checkbox" value=" " v-model="item.isChecked" v-show="isChecked"/>
-							
+							<input
+								type="checkbox"
+								id="checkbox"
+								value=" "
+								v-model="item.isChecked"
+								v-show="isChecked" />
+
 							<button class="delete-button" @click="deleteTask(item.id)" v-show="isVisible">❌</button>
-							<button class="restore-button" @click="restoreDelete(item.id)" v-show="isRestore">恢复</button>
+							<button class="restore-button" @click="restoreDelete(item.id)" v-show="isRestore">
+								恢复
+							</button>
 						</div>
 					</div>
 				</div>
@@ -53,12 +60,12 @@
 import { onMounted, ref, watchEffect } from "vue";
 import { addTask, getAllTasks } from "./api/tasks";
 import { BeiAnFooter } from "blue-vue-ui";
-// ts
+
 type TypeTask = {
 	id: number;
 	content: string;
 	isDeleted: boolean;
-	isChecked: boolean; // 表示是否已完成
+	isChecked: boolean;
 };
 
 const tasks = ref<TypeTask[]>([]);
@@ -110,22 +117,20 @@ const deleteTask = async (taskId: number) => {
 	tasks.value.map((item) => {
 		if (item.id === taskId) {
 			item.isDeleted = true;
-			isVisible.value=true;
-			isRestore.value=false;
+			isVisible.value = true;
+			isRestore.value = false;
 		}
 	});
 };
 
-const restoreDelete = async (taskId:number) =>{
-	tasks.value.map((item)=>{
-	if (item.id === taskId) {
+const restoreDelete = async (taskId: number) => {
+	tasks.value.map((item) => {
+		if (item.id === taskId) {
 			item.isDeleted = false;
-			isVisible.value=true;
-
-	}
-		});
-	};
-
+			isVisible.value = true;
+		}
+	});
+};
 
 type PageContextType = "default" | "doing" | "completed" | "deleted";
 
@@ -153,25 +158,25 @@ const isShow = (task: TypeTask) => {
 // 全选
 const selectAllTasks = () => {
 	pageContext.value = "default";
-	isVisible.value=true;
-	isRestore.value= false;
-	isChecked.value= true;
+	isVisible.value = true;
+	isRestore.value = false;
+	isChecked.value = true;
 };
 
 // 正在进行的任务
 const showInProgressTasks = () => {
 	pageContext.value = "doing";
-	isVisible.value=true;
-	isRestore.value= false;
-	isChecked.value= true;
+	isVisible.value = true;
+	isRestore.value = false;
+	isChecked.value = true;
 };
 
 // 已完成的任务
 const showCompletedTasks = () => {
 	pageContext.value = "completed";
-	isVisible.value=true;
-	isRestore.value= false;
-	isChecked.value= false;
+	isVisible.value = true;
+	isRestore.value = false;
+	isChecked.value = false;
 };
 
 // 回收站
@@ -179,7 +184,7 @@ const showRecycleBin = () => {
 	pageContext.value = "deleted";
 	isVisible.value = false;
 	isRestore.value = true;
-	isChecked.value= false;
+	isChecked.value = false;
 };
 
 // 全部标记为完成
@@ -198,7 +203,7 @@ const clearCompletedTasks = async () => {
 			tasks.value[i].isDeleted = true;
 		}
 	}
-	isVisible.value=true;
+	isVisible.value = true;
 };
 
 // 清除全部
@@ -206,7 +211,7 @@ const clearAllTasks = () => {
 	for (let i = 0; i < tasks.value.length; i++) {
 		tasks.value[i].isDeleted = true;
 	}
-	isVisible.value=true;
+	isVisible.value = true;
 };
 
 // 恢复
@@ -357,7 +362,7 @@ watchEffect(() => {
 	border: none;
 }
 
-.restore-button{
+.restore-button {
 	/* background: rgba(0, 0, 0, 0); */
 	float: right;
 	height: 30px;
@@ -367,5 +372,4 @@ watchEffect(() => {
 	margin-top: 1px;
 	height: 25px;
 }
-
 </style>
