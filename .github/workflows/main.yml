@@ -1,17 +1,12 @@
 on:
     push:
-        branches: [main, develop]
+        branches: [main, develop, auth]
 
 jobs:
     build:
         runs-on: ubuntu-latest
-        env:
-            MAIN_ENV: production
-            DEVELOP_ENV: development
-            DEFAULT_ENV: development
         environment:
-            name: ${{ (github.ref == 'refs/heads/main' && 'production')  ||
-                (github.ref == 'refs/heads/develop' && 'development') }}
+            name: ${{ (github.ref == 'refs/heads/main' && 'production')  || 'development' }}
         steps:
             - uses: actions/checkout@v4.2.2
               with:
@@ -33,7 +28,7 @@ jobs:
                   # 根据分支设置部署路径
                   if [ "${{ github.ref }}" = "$RELEASE_BRANCH" ]; then
                     echo "DEPLOY_DIR=$RELEASE_DIR" >> $GITHUB_ENV
-                  elif [ "${{ github.ref }}" = "$DEV_BRANCH" ]; then
+                  else
                     echo "DEPLOY_DIR=$DEV_DIR" >> $GITHUB_ENV
                   fi
             - name: Setup SSH
