@@ -12,6 +12,7 @@ const request = axios.create({
 	headers: {
 		"Content-Type": "application/json",
 	},
+	withCredentials: true,
 });
 
 request.interceptors.request.use((config) => {
