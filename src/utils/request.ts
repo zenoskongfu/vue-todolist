@@ -35,7 +35,7 @@ request.interceptors.response.use((res) => {
 	
 },(res)=>{
 	if (res.status === 403) {
-		window.location.href = "http://dev.qdsj.top/authqdsj/login?redirect=" + window.location.href;
+		window.location.href = import.meta.env.VITE_AUTH_URL + "?redirect=" + window.location.href;
 	}
 });
 
